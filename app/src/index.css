@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-inter: 'Inter', sans-serif;
+    --background: 210 20% 98%;
+    --foreground: 220 13% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 13%;
+    --primary: 145 16% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 94%;
+    --secondary-foreground: 220 13% 20%;
+    --muted: 210 14% 96%;
+    --muted-foreground: 215 8% 47%;
+    --accent: 210 14% 94%;
+    --accent-foreground: 220 13% 13%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 18% 91%;
+    --input: 214 18% 91%;
+    --ring: 145 16% 49%;
+    --chart-1: 145 16% 49%;
+    --chart-2: 210 40% 52%;
+    --chart-3: 30 60% 52%;
+    --chart-4: 280 40% 52%;
+    --chart-5: 350 50% 55%;
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 13% 20%;
+    --sidebar-primary: 145 16% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 14% 96%;
+    --sidebar-accent-foreground: 220 13% 13%;
+    --sidebar-border: 214 18% 93%;
+    --sidebar-ring: 145 16% 49%;
+  }
+
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 210 20% 94%;
+    --card: 0 0% 10%;
+    --card-foreground: 210 20% 94%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 210 20% 94%;
+    --primary: 145 22% 55%;
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 14%;
+    --secondary-foreground: 210 20% 90%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 215 10% 55%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 210 20% 94%;
+    --destructive: 0 62% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 145 22% 55%;
+    --chart-1: 145 22% 55%;
+    --chart-2: 210 45% 58%;
+    --chart-3: 30 65% 58%;
+    --chart-4: 280 45% 60%;
+    --chart-5: 350 55% 60%;
+    --sidebar-background: 0 0% 9%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 145 22% 55%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 210 20% 94%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 145 22% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-inter;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Hide scrollbars on mobile horizontal scroll lists */
+@media (max-width: 767px) {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Prevent iOS zoom on inputs */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
