@@ -53,10 +53,10 @@ export default async function handler(req, res) {
       contents: [{ role: 'user', parts: [{ text: (prompt || '') + schemaHint }] }],
       generationConfig: { temperature: 0.7 },
     };
-    // Grounding con búsqueda de Google si la app pide contexto de internet.
-    if (add_context_from_internet) {
-      payload.tools = [{ google_search: {} }];
-    }
+    // Nota: el "grounding" con búsqueda de Google (google_search) requiere facturación
+    // y no está en el plan gratuito, así que no se usa. El modelo responde con su
+    // propio conocimiento (suficiente para recomendaciones/análisis de cine).
+    void add_context_from_internet;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const r = await fetch(url, {
