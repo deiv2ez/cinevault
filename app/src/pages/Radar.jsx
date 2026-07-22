@@ -5,8 +5,10 @@ import { Radar as RadarIcon, Star, Plus, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { getTmdbKey, fetchRadarReleases } from '@/lib/tmdb';
 
-const CURRENT_YEAR = 2026;
+const CURRENT_YEAR = new Date().getFullYear();
 
 export default function Radar() {
   const [releases, setReleases] = useState([]);
@@ -44,51 +46,32 @@ export default function Radar() {
   };
 
   const fetchRadar = async () => {
+    const key = getTmdbKey();
+    if (!key) {
+      toast.error('Configura tu API Key de TMDB en Ajustes para usar el Radar.');
+      return;
+    }
     setLoading(true);
-    const prompt = `Eres un experto en cine actual. Lista los 12 estrenos más esperados e importantes de ${CURRENT_YEAR} y ${CURRENT_YEAR + 1} (películas y series de alta calidad, festivales, blockbusters de autor, etc.).
+    try {
+      // Datos reales y actuales desde TMDB (próximos estrenos + populares del año).
+      const list = await fetchRadarReleases(key, CURRENT_YEAR);
+      const enriched = list.map(r => ({
+        ...r,
+        isMyDirector: isMyDirector(r.director),
+        isSequel: isSequel(r.title),
+        alreadyAdded: existingTitles.includes((r.title || '').toLowerCase()),
+      }));
 
-Responde SOLO con JSON válido.`;
+      enriched.sort((a, b) => {
+        const aScore = (a.isMyDirector ? 2 : 0) + (a.isSequel ? 1 : 0);
+        const bScore = (b.isMyDirector ? 2 : 0) + (b.isSequel ? 1 : 0);
+        return bScore - aScore;
+      });
 
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      add_context_from_internet: true,
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          releases: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                title: { type: 'string' },
-                director: { type: 'string' },
-                year: { type: 'number' },
-                release_date: { type: 'string' },
-                genres: { type: 'array', items: { type: 'string' } },
-                poster_url: { type: 'string' },
-                synopsis: { type: 'string' },
-                category: { type: 'string' },
-              }
-            }
-          }
-        }
-      }
-    });
-
-    const enriched = (result.releases || []).map(r => ({
-      ...r,
-      isMyDirector: isMyDirector(r.director),
-      isSequel: isSequel(r.title),
-      alreadyAdded: existingTitles.includes(r.title.toLowerCase()),
-    }));
-
-    enriched.sort((a, b) => {
-      const aScore = (a.isMyDirector ? 2 : 0) + (a.isSequel ? 1 : 0);
-      const bScore = (b.isMyDirector ? 2 : 0) + (b.isSequel ? 1 : 0);
-      return bScore - aScore;
-    });
-
-    setReleases(enriched);
+      setReleases(enriched);
+    } catch (e) {
+      toast.error('No se pudieron cargar los estrenos de TMDB.');
+    }
     setLoading(false);
   };
 

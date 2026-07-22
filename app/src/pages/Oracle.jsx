@@ -5,6 +5,7 @@ import { Sparkles, Plus, RefreshCw, Film, Star, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { getTmdbKey, searchBest, posterFrom } from '@/lib/tmdb';
 
 function SuggestionCard({ suggestion, onAdd, adding }) {
   return (
@@ -148,7 +149,23 @@ Responde SOLO con JSON válido, sin texto adicional.`;
       }
     });
 
-    setSuggestions(result.suggestions || []);
+    const suggestions = result.suggestions || [];
+    // Enriquecer con pósters reales de TMDB (la IA suele no dar una URL válida)
+    const key = getTmdbKey();
+    if (key) {
+      await Promise.all(suggestions.map(async (s) => {
+        try {
+          const hit = await searchBest(s.title, s.year, key);
+          if (hit) {
+            if (hit.poster_path) s.poster_url = posterFrom(hit.poster_path);
+            if ((s.tmdb_rating == null || s.tmdb_rating === '') && typeof hit.vote_average === 'number') {
+              s.tmdb_rating = (Math.round(hit.vote_average * 10) / 10).toString();
+            }
+          }
+        } catch { /* noop */ }
+      }));
+    }
+    setSuggestions(suggestions);
     setLoading(false);
   };
 

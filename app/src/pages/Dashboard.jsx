@@ -2,7 +2,7 @@ import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useDeduplicatedItems } from '@/lib/useDeduplicatedItems';
-import { Eye, Users, Layers, RefreshCw, ThumbsDown, Star, Sparkles, Radar, Shuffle, Clock, FlaskConical, Swords, Dna, Trash2 } from 'lucide-react';
+import { Eye, Users, Layers, RefreshCw, ThumbsDown, Star, Sparkles, Radar, Shuffle, Clock, FlaskConical, PenLine, Dna, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import StatCard from '@/components/dashboard/StatCard';
 import ScatterPlot from '@/components/dashboard/ScatterPlot';
@@ -16,7 +16,7 @@ const QUICK_TOOLS = [
   { path: '/oracle', label: 'El Oráculo', desc: 'Sugerencias IA personalizadas', icon: Sparkles, color: 'text-primary bg-primary/10' },
   { path: '/radar', label: 'Filmoradar', desc: 'Estrenos del año', icon: Radar, color: 'text-amber-500 bg-amber-500/10' },
   { path: '/picker', label: '¿Qué veo hoy?', desc: 'Ruleta del watchlist', icon: Shuffle, color: 'text-chart-3 bg-chart-3/10' },
-  { path: '/duel', label: 'ELO Duels', desc: 'Ranking por instinto', icon: Swords, color: 'text-chart-4 bg-chart-4/10' },
+  { path: '/critic', label: 'Anton Ego', desc: 'Mi crítica y mi nota IA', icon: PenLine, color: 'text-chart-4 bg-chart-4/10' },
   { path: '/dna', label: 'ADN Ciné', desc: 'Tu filosofía vital', icon: Dna, color: 'text-chart-5 bg-chart-5/10' },
   { path: '/social', label: 'Connect', desc: 'Doble Oráculo', icon: Users, color: 'text-chart-2 bg-chart-2/10' },
   { path: '/purge', label: 'Purgar', desc: 'Triage de pendientes', icon: Trash2, color: 'text-destructive bg-destructive/10' },

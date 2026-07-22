@@ -10,6 +10,8 @@ import MediaTable from '@/components/library/MediaTable';
 import FilterSidebar from '@/components/library/FilterSidebar';
 import MediaDetailSheet from '@/components/library/MediaDetailSheet';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export default function Library() {
   const [view, setView] = useState('gallery');
   const [showFilters, setShowFilters] = useState(true);
@@ -17,7 +19,8 @@ export default function Library() {
   const [sortConfig, setSortConfig] = useState({ key: 'rating', direction: 'desc' });
   const [filters, setFilters] = useState({
     search: '', category: '', status: '', genres: [], director: '',
-    minRating: 0, maxRating: 10, minYear: 1900, maxYear: 2026
+    minRating: 0, maxRating: 10, minYear: 1900, maxYear: CURRENT_YEAR,
+    watchedAt: '', overrated: false, underrated: false, hasQuote: false, hasHighlights: false
   });
 
   const WATCHED_STATUSES = ['Visto', 'Visto muchas veces', 'Favorito'];
@@ -71,7 +74,16 @@ export default function Library() {
       if (minR > 0 || maxR < 10) {
         if (item.rating == null || item.rating < minR || item.rating > maxR) return false;
       }
-      if (item.year != null && (item.year < (filters.minYear ?? 1900) || item.year > (filters.maxYear ?? 2026))) return false;
+      if (item.year != null && (item.year < (filters.minYear ?? 1900) || item.year > (filters.maxYear ?? CURRENT_YEAR))) return false;
+      // Filtros por tus anotaciones
+      if (filters.overrated && !item.overrated) return false;
+      if (filters.underrated && !item.underrated) return false;
+      if (filters.hasQuote && !(item.favorite_quote || '').trim()) return false;
+      if (filters.hasHighlights && !((item.highlight1 || '').trim() || (item.highlight2 || '').trim() || (item.highlight3 || '').trim())) return false;
+      if (filters.watchedAt) {
+        const w = (item.watched_at || '').toLowerCase();
+        if (!w.includes(filters.watchedAt.toLowerCase())) return false;
+      }
       return true;
     });
 
@@ -173,7 +185,7 @@ export default function Library() {
       {/* Content */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {showFilters && (
-          <aside className="w-full md:w-[240px] flex-shrink-0">
+          <aside className="w-full md:w-[240px] flex-shrink-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto scrollbar-hide">
             <FilterSidebar filters={filters} setFilters={setFilters} genres={genres} directors={directors} />
           </aside>
         )}

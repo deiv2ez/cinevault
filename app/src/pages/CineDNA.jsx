@@ -107,7 +107,7 @@ Genera:
               un manifiesto filosófico personal, tu arquetipo cinematográfico y recomendaciones literarias cruzadas.
             </p>
             <p className="text-xs text-amber-600 bg-amber-500/10 rounded-lg px-3 py-1.5">
-              Usa Claude Sonnet — análisis profundo · ~30 segundos
+              Análisis profundo con IA (Gemini) · ~30 segundos
             </p>
           </div>
           <Button onClick={run} disabled={loading} size="lg" className="min-w-[260px]">

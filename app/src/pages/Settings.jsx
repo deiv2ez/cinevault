@@ -293,11 +293,11 @@ export default function Settings() {
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <FileText className="w-5 h-5 text-chart-2" />
-            Enriquecimiento de Pósters
+            Enriquecer datos con TMDB
           </CardTitle>
           <CardDescription>
-            Busca y descarga automáticamente los pósters desde TMDB para todas las obras sin imagen.
-            Rate limit: ~3 req/seg para no saturar la API.
+            Completa desde TMDB los datos que falten en tus obras: póster, director, año, género,
+            país y nota pública (necesaria para "Tus hot takes"). Proceso manual, a tu ritmo.
           </CardDescription>
         </CardHeader>
         <CardContent>
