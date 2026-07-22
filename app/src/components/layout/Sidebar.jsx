@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Library, PlusCircle, Trophy, Settings, 
   ChevronLeft, ChevronRight, Sun, Moon, Film,
   Sparkles, Radar, Shuffle, Clock, Layers, FlaskConical,
-  Swords, Dna, Users, Clapperboard, Compass
+  PenLine, Flame, Dna, Users, Clapperboard, Compass
 } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -25,7 +25,8 @@ const navItems = [
   { path: '/collections', label: 'Colecciones', icon: Layers },
   { path: '/lab', label: 'El Laboratorio', icon: FlaskConical },
   { divider: true, label: 'Pro' },
-  { path: '/duel', label: 'ELO Duels', icon: Swords },
+  { path: '/critic', label: 'Anton Ego', icon: PenLine },
+  { path: '/hot-takes', label: 'Tus hot takes', icon: Flame },
   { path: '/dna', label: 'ADN Cinematográfico', icon: Dna },
   { path: '/social', label: 'Connect', icon: Users },
   { path: '/watchlist', label: 'Por ver', icon: Clapperboard },

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Library, PlusCircle, Trophy, Settings,
   Sparkles, Radar, Shuffle, Clock, Layers, FlaskConical,
-  Swords, Dna, Users, Clapperboard, Compass, X, Sun, Moon
+  PenLine, Flame, Dna, Users, Clapperboard, Compass, X, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/ThemeContext';
@@ -23,7 +23,8 @@ const allNav = [
   { path: '/collections', label: 'Colecciones',         icon: Layers },
   { path: '/lab',         label: 'El Laboratorio',      icon: FlaskConical },
   { divider: 'Pro' },
-  { path: '/duel',        label: 'ELO Duels',           icon: Swords },
+  { path: '/critic',      label: 'Anton Ego',           icon: PenLine },
+  { path: '/hot-takes',   label: 'Tus hot takes',       icon: Flame },
   { path: '/dna',         label: 'ADN Cinematográfico', icon: Dna },
   { path: '/social',      label: 'Connect',             icon: Users },
   { path: '/watchlist',   label: 'Por ver',             icon: Clapperboard },
