@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Library, PlusCircle, Trophy, Settings,
   Sparkles, Radar, Shuffle, Clock, Layers, FlaskConical,
-  Swords, Dna, Users, Trash2, Compass, X, Sun, Moon
+  Swords, Dna, Users, Clapperboard, Compass, X, Sun, Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/ThemeContext';
@@ -26,7 +26,7 @@ const allNav = [
   { path: '/duel',        label: 'ELO Duels',           icon: Swords },
   { path: '/dna',         label: 'ADN Cinematográfico', icon: Dna },
   { path: '/social',      label: 'Connect',             icon: Users },
-  { path: '/purge',       label: 'Purgar Pendientes',   icon: Trash2 },
+  { path: '/watchlist',   label: 'Por ver',             icon: Clapperboard },
   { divider: '' },
   { path: '/settings',    label: 'Ajustes',             icon: Settings },
 ];
