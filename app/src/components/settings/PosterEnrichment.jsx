@@ -1,56 +1,80 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
-import { ImageIcon, Loader2, CheckCircle2, Zap } from 'lucide-react';
+import { ImageIcon, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-
-const TMDB_API_KEY = 'YOUR_TMDB_KEY'; // User must set this in Settings
+import { searchBest, fetchDetails, posterFrom, genreMap } from '@/lib/tmdb';
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// ¿A esta obra le faltan datos que TMDB puede rellenar?
+const needsEnrich = (i) =>
+  !i.poster_url || !i.director || !i.year || !i.genre1 ||
+  !i.country || !i.tmdb_id || i.tmdb_rating == null;
 
 export default function PosterEnrichment({ items, tmdbKey }) {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(null);
   const queryClient = useQueryClient();
 
-  const withoutPosters = items.filter(i => !i.poster_url && i.title);
+  const pending = items.filter(i => i.title && needsEnrich(i));
 
   const run = async () => {
     if (!tmdbKey) return;
     setRunning(true);
-    let done = 0, found = 0;
-    const total = withoutPosters.length;
+    let done = 0, updated = 0;
+    const total = pending.length;
+    const gmap = await genreMap(tmdbKey);
 
-    for (const item of withoutPosters) {
+    for (const item of pending) {
       try {
-        const query = encodeURIComponent(item.title);
-        const yearParam = item.year ? `&year=${item.year}` : '';
-        const res = await fetch(
-          `https://api.themoviedb.org/3/search/movie?api_key=${tmdbKey}&query=${query}${yearParam}&language=es-ES`
-        );
-        const data = await res.json();
-        const hit = data.results?.[0];
-        if (hit?.poster_path) {
-          const posterUrl = `https://image.tmdb.org/t/p/w342${hit.poster_path}`;
-          await base44.entities.MediaItem.update(item.id, { poster_url: posterUrl, tmdb_id: String(hit.id) });
-          found++;
+        const hit = await searchBest(item.title, item.year, tmdbKey);
+        if (hit) {
+          const patch = {};
+          if (hit.id) patch.tmdb_id = String(hit.id);
+          if (item.tmdb_rating == null && typeof hit.vote_average === 'number') {
+            patch.tmdb_rating = Math.round(hit.vote_average * 10) / 10;
+          }
+          if (!item.poster_url && hit.poster_path) patch.poster_url = posterFrom(hit.poster_path, 'w342');
+          if (!item.year && hit.release_date) patch.year = parseInt(hit.release_date.slice(0, 4));
+          if (!item.synopsis && hit.overview) patch.synopsis = hit.overview;
+          if (!item.genre1 && (hit.genre_ids || []).length) {
+            const names = hit.genre_ids.map(id => gmap[id]).filter(Boolean);
+            if (names[0]) patch.genre1 = names[0];
+            if (!item.genre2 && names[1]) patch.genre2 = names[1];
+          }
+
+          // Solo pedimos detalles (llamada extra) si aún falta director o país.
+          if ((!item.director || !item.country) && hit.id) {
+            const det = await fetchDetails(hit.id, tmdbKey);
+            if (det) {
+              if (!item.director && det.director) patch.director = det.director;
+              if (!item.country && det.country) patch.country = det.country;
+            }
+          }
+
+          if (Object.keys(patch).length) {
+            await base44.entities.MediaItem.update(item.id, patch);
+            updated++;
+          }
         }
       } catch (_) {}
       done++;
-      setProgress({ done, total, found });
-      // Rate limit: ~3 req/sec to be safe
-      await sleep(350);
+      setProgress({ done, total, updated });
+      await sleep(280);
     }
 
     queryClient.invalidateQueries({ queryKey: ['media-items'] });
+    queryClient.invalidateQueries({ queryKey: ['media-items-all'] });
+    queryClient.invalidateQueries({ queryKey: ['media-items-library'] });
     setRunning(false);
   };
 
-  if (withoutPosters.length === 0) {
+  if (pending.length === 0) {
     return (
       <div className="flex items-center gap-2 text-sm text-primary">
         <CheckCircle2 className="w-4 h-4" />
-        Todas las obras tienen póster asignado
+        Todas tus obras tienen sus datos completos
       </div>
     );
   }
@@ -58,7 +82,7 @@ export default function PosterEnrichment({ items, tmdbKey }) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">{withoutPosters.length}</span> obras sin póster detectadas.
+        <span className="font-semibold text-foreground">{pending.length}</span> obras con datos incompletos (póster, director, año, género, país o nota pública).
       </p>
 
       {running && progress && (
@@ -70,7 +94,7 @@ export default function PosterEnrichment({ items, tmdbKey }) {
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            {progress.done}/{progress.total} procesadas · {progress.found} pósters encontrados
+            {progress.done}/{progress.total} procesadas · {progress.updated} obras actualizadas
           </p>
         </div>
       )}
@@ -78,7 +102,7 @@ export default function PosterEnrichment({ items, tmdbKey }) {
       {!running && progress && (
         <div className="flex items-center gap-2 text-sm text-primary">
           <CheckCircle2 className="w-4 h-4" />
-          Completado: {progress.found} pósters añadidos
+          Completado: {progress.updated} obras enriquecidas
         </div>
       )}
 
@@ -89,9 +113,9 @@ export default function PosterEnrichment({ items, tmdbKey }) {
         size="sm"
       >
         {running ? (
-          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Buscando pósters...</>
+          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Enriqueciendo datos...</>
         ) : (
-          <><ImageIcon className="w-4 h-4 mr-2" /> Enriquecer con pósters TMDB</>
+          <><ImageIcon className="w-4 h-4 mr-2" /> Enriquecer datos faltantes con TMDB</>
         )}
       </Button>
 
