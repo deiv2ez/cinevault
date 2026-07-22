@@ -21,6 +21,7 @@ import DirectorLab from '@/pages/DirectorLab';
 import EloDuel from '@/pages/EloDuel';
 
 import WatchlistPurge from '@/pages/WatchlistPurge';
+import Watchlist from '@/pages/Watchlist';
 import CineDNA from '@/pages/CineDNA';
 import Social from '@/pages/Social';
 import Explore from '@/pages/Explore';
@@ -70,6 +71,7 @@ const AuthenticatedApp = () => {
         <Route path="/social" element={<Social />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/purge" element={<WatchlistPurge />} />
+        <Route path="/watchlist" element={<Watchlist />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
