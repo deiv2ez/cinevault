@@ -18,7 +18,8 @@ import WatchPicker from '@/pages/WatchPicker';
 import Timeline from '@/pages/Timeline';
 import SmartCollections from '@/pages/SmartCollections';
 import DirectorLab from '@/pages/DirectorLab';
-import EloDuel from '@/pages/EloDuel';
+import AntonEgo from '@/pages/AntonEgo';
+import HotTakes from '@/pages/HotTakes';
 
 import WatchlistPurge from '@/pages/WatchlistPurge';
 import Watchlist from '@/pages/Watchlist';
@@ -66,7 +67,8 @@ const AuthenticatedApp = () => {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/collections" element={<SmartCollections />} />
         <Route path="/lab" element={<DirectorLab />} />
-        <Route path="/duel" element={<EloDuel />} />
+        <Route path="/critic" element={<AntonEgo />} />
+        <Route path="/hot-takes" element={<HotTakes />} />
         <Route path="/dna" element={<CineDNA />} />
         <Route path="/social" element={<Social />} />
         <Route path="/explore" element={<Explore />} />
