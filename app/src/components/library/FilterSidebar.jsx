@@ -11,10 +11,12 @@ const STATUSES = ['Visto', 'Visto muchas veces', 'Pendiente', 'Abandono', 'Favor
 
 export default function FilterSidebar({ filters, setFilters, genres, directors }) {
   const update = (key, value) => setFilters(prev => ({ ...prev, [key]: value }));
+  const currentYear = new Date().getFullYear();
 
   const clear = () => setFilters({
     search: '', category: '', status: '', genres: [], director: '',
-    minRating: 0, maxRating: 10, minYear: 1900, maxYear: 2026
+    minRating: 0, maxRating: 10, minYear: 1900, maxYear: currentYear,
+    watchedAt: '', overrated: false, underrated: false, hasQuote: false, hasHighlights: false
   });
 
   const toggleGenre = (genre) => {
@@ -26,9 +28,17 @@ export default function FilterSidebar({ filters, setFilters, genres, directors }
   const hasFilters = filters.search || filters.category || filters.status ||
     (filters.genres || []).length > 0 || filters.director ||
     filters.minRating > 0 || filters.maxRating < 10 ||
-    filters.minYear > 1900 || filters.maxYear < 2026;
+    filters.minYear > 1900 || filters.maxYear < currentYear ||
+    filters.watchedAt || filters.overrated || filters.underrated ||
+    filters.hasQuote || filters.hasHighlights;
 
-  const currentYear = 2026;
+  const toggleFlag = (key) => update(key, !filters[key]);
+  const annotationFlags = [
+    { key: 'overrated', label: 'Sobrevalorada' },
+    { key: 'underrated', label: 'Infravalorada' },
+    { key: 'hasQuote', label: 'Con frase favorita' },
+    { key: 'hasHighlights', label: 'Con destacados' },
+  ];
 
   return (
     <div className="space-y-5">
@@ -123,6 +133,40 @@ export default function FilterSidebar({ filters, setFilters, genres, directors }
           value={[filters.minYear ?? 1900, filters.maxYear ?? currentYear]}
           onValueChange={([min, max]) => setFilters(prev => ({ ...prev, minYear: min, maxYear: max }))}
           min={1900} max={currentYear} step={1}
+        />
+      </div>
+
+      {/* Tus anotaciones */}
+      <div>
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 block">Tus anotaciones</label>
+        <div className="flex flex-wrap gap-1.5">
+          {annotationFlags.map(f => {
+            const active = !!filters[f.key];
+            return (
+              <button
+                key={f.key}
+                onClick={() => toggleFlag(f.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-all ${
+                  active
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border hover:border-primary/50'
+                }`}
+              >
+                {f.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vista en (dónde/cuándo) */}
+      <div>
+        <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5 block">Vista en</label>
+        <Input
+          placeholder="p. ej. avión, cine, con..."
+          value={filters.watchedAt || ''}
+          onChange={e => update('watchedAt', e.target.value)}
+          className="bg-card text-sm"
         />
       </div>
 
