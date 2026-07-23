@@ -8,7 +8,7 @@ import MediaForm from '@/components/add/MediaForm';
 
 const emptyForm = {
   title: '', title_alt: '', year: null, rating: 5, category: '', director: '',
-  genre1: '', genre2: '', status: '', comments: '', highlight1: '', highlight2: '',
+  genre1: '', genre2: '', status: 'Visto', comments: '', highlight1: '', highlight2: '',
   highlight3: '', favorite_quote: '', watched_at: '', country: '', synopsis: '',
   poster_url: '', tmdb_id: '', overrated: false, underrated: false
 };
@@ -63,6 +63,8 @@ export default function AddNew() {
     Object.keys(payload).forEach(k => {
       if (payload[k] === '') payload[k] = undefined;
     });
+    // Por defecto "Visto": evita que las obras sin estado caigan en el limbo (no aparecen en ningún listado).
+    if (!payload.status) payload.status = 'Visto';
 
     if (isEdit && editId) {
       await base44.entities.MediaItem.update(editId, payload);
