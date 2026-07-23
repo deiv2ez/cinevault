@@ -63,10 +63,11 @@ export default function AntonEgo() {
     const genreMap = {};
     items.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) genreMap[g] = (genreMap[g] || 0) + 1; }));
     const topGenres = Object.entries(genreMap).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([g]) => g);
-    const withComments = rated.filter(i => (i.comments || '').trim().length > 30)
+    const withCommentsRaw = rated.filter(i => (i.comments || '').trim().length > 30)
       .sort((a, b) => Math.abs(Number(b.rating) - avg) - Math.abs(Number(a.rating) - avg))
-      .slice(0, 14).map(i => `"${i.title}" (${Number(i.rating).toFixed(1)}/10): ${(i.comments || '').trim().slice(0, 300)}`);
-    return { count: items.length, avg, topDirectors, topGenres, withComments };
+      .slice(0, 24)
+      .map(i => ({ norm: norm(i.title), text: `"${i.title}" (${Number(i.rating).toFixed(1)}/10): ${(i.comments || '').trim().slice(0, 300)}` }));
+    return { count: items.length, avg, topDirectors, topGenres, withCommentsRaw };
   }, [items]);
 
   // Casos de calibración: falsos positivos reales (prestigio/espectáculo alto pero él la puntuó bajo).
@@ -92,8 +93,10 @@ CASOS DE CALIBRACIÓN (tus falsos positivos reales — un crítico ingenuo habr�
 ${top.map(m => `- "${m.title}"${m.year ? ` (${m.year})` : ''}: expectativa del público/prestigio ~${m.expected.toFixed(1)}, tu nota real ${m.rating.toFixed(1)}. Tu razón: "${m.comments.slice(0, 200)}"`).join('\n')}`;
   };
 
-  const buildProfileText = () => {
+  // excludeNorm: evita la fuga en backtesting (no incluir la reseña de la película que se está prediciendo).
+  const buildProfileText = (excludeNorm) => {
     const dirs = profile.topDirectors.map(d => `${d.d} (${d.n} obras, media ${d.avg.toFixed(1)})`).join('; ');
+    const samples = profile.withCommentsRaw.filter(w => w.norm !== excludeNorm).slice(0, 14).map(w => w.text);
     return `${CRITIC_VOICE}
 
 Contexto del gusto real del espectador (${profile.count} obras, nota media ${profile.avg.toFixed(1)}):
@@ -101,7 +104,7 @@ Directores recurrentes: ${dirs || 'n/d'}
 Géneros más presentes: ${profile.topGenres.join(', ') || 'n/d'}
 
 Muestras de sus reseñas reales (imita este tono, vocabulario y exigencia):
-${profile.withComments.join('\n') || 'n/d'}`;
+${samples.join('\n') || 'n/d'}`;
   };
 
   const STYLE_RULES = `Directrices de estilo (mantenlas SIEMPRE):
@@ -113,7 +116,7 @@ ${profile.withComments.join('\n') || 'n/d'}`;
   // Motor: predice nota (+ crítica o motivo) de una película con la voz calibrada.
   const antonPredict = async (meta, { quick }) => {
     const cal = buildCalibration(norm(meta.title));
-    const base = `${buildProfileText()}
+    const base = `${buildProfileText(norm(meta.title))}
 
 ${cal || WEIGHT_RULES}
 
