@@ -1,14 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Library, PlusCircle, Compass, Users } from 'lucide-react';
+import { LayoutDashboard, Library, PlusCircle, Clapperboard, PenLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const tabs = [
-  { path: '/',        label: 'Inicio',     icon: LayoutDashboard },
-  { path: '/library', label: 'Biblioteca', icon: Library },
-  { path: '/add',     label: 'Añadir',     icon: PlusCircle },
-  { path: '/explore', label: 'Explorar',   icon: Compass },
-  { path: '/social',  label: 'Connect',    icon: Users },
+  { path: '/',          label: 'Inicio',     icon: LayoutDashboard },
+  { path: '/library',   label: 'Biblioteca', icon: Library },
+  { path: '/add',       label: 'Añadir',     icon: PlusCircle },
+  { path: '/watchlist', label: 'Pendientes', icon: Clapperboard },
+  { path: '/critic',    label: 'Anton Ego',  icon: PenLine },
 ];
 
 export default function BottomNav() {
@@ -33,10 +33,10 @@ export default function BottomNav() {
             )}
           >
             <Icon
-              className={cn('w-[26px] h-[26px]', active && 'text-primary')}
+              className={cn('w-[23px] h-[23px]', active && 'text-primary')}
               strokeWidth={active ? 2.2 : 1.6}
             />
-            <span className={cn('text-[11px] font-medium', active ? 'text-primary' : 'text-muted-foreground')}>
+            <span className={cn('text-[10px] font-medium leading-none whitespace-nowrap', active ? 'text-primary' : 'text-muted-foreground')}>
               {label}
             </span>
           </Link>

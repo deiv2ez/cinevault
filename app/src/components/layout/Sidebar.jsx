@@ -19,7 +19,6 @@ const navItems = [
   { path: '/oracle', label: 'El Oráculo IA', icon: Sparkles },
   { path: '/radar', label: 'Filmoradar', icon: Radar },
   { path: '/picker', label: '¿Qué veo hoy?', icon: Shuffle },
-  { path: '/explore', label: 'Explorar', icon: Compass },
   { divider: true, label: 'Apuntes' },
   { path: '/timeline', label: 'Mi Timeline', icon: Clock },
   { path: '/collections', label: 'Colecciones', icon: Layers },

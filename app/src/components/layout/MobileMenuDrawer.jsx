@@ -13,7 +13,6 @@ const allNav = [
   { path: '/library',     label: 'Mi Biblioteca',       icon: Library },
   { path: '/add',         label: 'Añadir Nueva',        icon: PlusCircle },
   { path: '/rankings',    label: 'Rankings',            icon: Trophy },
-  { path: '/explore',     label: 'Explorar',            icon: Compass },
   { divider: 'Descubrir' },
   { path: '/oracle',      label: 'El Oráculo IA',       icon: Sparkles },
   { path: '/radar',       label: 'Filmoradar',          icon: Radar },
