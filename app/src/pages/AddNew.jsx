@@ -71,7 +71,7 @@ export default function AddNew() {
       await base44.entities.MediaItem.create(payload);
       toast.success('Obra añadida a tu biblioteca');
     }
-    queryClient.invalidateQueries({ queryKey: ['media-items'] });
+    queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey?.[0] === 'string' && q.queryKey[0].startsWith('media-items') });
     setSaving(false);
     if (!isEdit) setData({ ...emptyForm });
     else navigate('/library');

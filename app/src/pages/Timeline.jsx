@@ -5,6 +5,9 @@ import { Clock, Film, Star, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+// "Vistas" = terminadas (igual que en Mi Biblioteca): excluye Pendiente, En progreso y Abandono.
+const WATCHED = ['Visto', 'Visto muchas veces', 'Favorito'];
+
 function extractYear(watchedAt) {
   if (!watchedAt) return null;
   const yearMatch = String(watchedAt).match(/\b(19|20)\d{2}\b/);
@@ -19,7 +22,7 @@ export default function Timeline() {
   });
 
   const timelineData = useMemo(() => {
-    const watched = items.filter(i => i.status && i.status !== 'Pendiente');
+    const watched = items.filter(i => WATCHED.includes(i.status));
 
     const grouped = {};
     watched.forEach(item => {
@@ -40,7 +43,7 @@ export default function Timeline() {
 
   const noDate = useMemo(() => {
     return items.filter(i =>
-      i.status && i.status !== 'Pendiente' &&
+      WATCHED.includes(i.status) &&
       !extractYear(i.watched_at) && !i.year
     );
   }, [items]);
@@ -63,7 +66,7 @@ export default function Timeline() {
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Diario de Visionado</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          Tu historia cinematográfica año por año · {items.filter(i => i.status !== 'Pendiente').length} obras vistas
+          Tu historia cinematográfica año por año · {items.filter(i => WATCHED.includes(i.status)).length} obras vistas
         </p>
       </div>
 

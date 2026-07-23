@@ -88,7 +88,7 @@ export default function Radar() {
       synopsis: release.synopsis || '',
       poster_url: release.poster_url || '',
     });
-    queryClient.invalidateQueries({ queryKey: ['media-items'] });
+    queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey?.[0] === 'string' && q.queryKey[0].startsWith('media-items') });
     setReleases(prev => prev.map(r => r.title === release.title ? { ...r, alreadyAdded: true } : r));
     setAddingId(null);
   };
@@ -231,7 +231,7 @@ function ReleaseCard({ release, onAdd, adding }) {
           ) : adding ? (
             <div className="w-4 h-4 border-2 border-current/40 border-t-current rounded-full animate-spin" />
           ) : (
-            <><Plus className="w-3.5 h-3.5 mr-1.5" /> Añadir recordatorio</>
+            <><Plus className="w-3.5 h-3.5 mr-1.5" /> Añadir a Pendientes</>
           )}
         </Button>
       </div>

@@ -3,23 +3,30 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Clapperboard } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import MediaCard from '@/components/library/MediaCard';
 import MediaDetailSheet from '@/components/library/MediaDetailSheet';
 
-// Página "Por ver": lista todas las obras con estado "Pendiente" (y "En progreso")
-// juntas, para poder repasarlas de un vistazo. Sustituye a "Purgar Pendientes".
-const WATCHLIST_STATUSES = ['Pendiente', 'En progreso'];
+// Página "Pendientes": todo lo que aún no has terminado (Pendiente / En progreso)
+// más un acceso a las que dejaste a medias (Abandono), que si no quedarían inalcanzables.
+const LOAD_STATUSES = ['Pendiente', 'En progreso', 'Abandono'];
+
+const VIEWS = [
+  { key: 'active', label: 'Por ver', statuses: ['Pendiente', 'En progreso'] },
+  { key: 'abandoned', label: 'Abandonadas', statuses: ['Abandono'] },
+];
 
 export default function Watchlist() {
   const [selectedItem, setSelectedItem] = useState(null);
   const [search, setSearch] = useState('');
   const [sortKey, setSortKey] = useState('created_date');
+  const [view, setView] = useState('active');
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['media-items-watchlist'],
     queryFn: async () => {
       const results = await Promise.all(
-        WATCHLIST_STATUSES.map(status =>
+        LOAD_STATUSES.map(status =>
           base44.entities.MediaItem.filter({ status }, '-created_date', 5000)
         )
       );
@@ -27,8 +34,15 @@ export default function Watchlist() {
     },
   });
 
+  const counts = useMemo(() => ({
+    active: items.filter(i => i.status === 'Pendiente' || i.status === 'En progreso').length,
+    abandoned: items.filter(i => i.status === 'Abandono').length,
+  }), [items]);
+
   const filtered = useMemo(() => {
+    const allowed = VIEWS.find(v => v.key === view)?.statuses || [];
     let result = items.filter(item => {
+      if (!allowed.includes(item.status)) return false;
       if (!search) return true;
       const s = search.toLowerCase();
       return (item.title || '').toLowerCase().includes(s) ||
@@ -43,12 +57,11 @@ export default function Watchlist() {
       if (sortKey === 'title') return (a.title || '').localeCompare(b.title || '');
       if (sortKey === 'year') return (b.year || 0) - (a.year || 0);
       if (sortKey === 'rating') return (b.rating || 0) - (a.rating || 0);
-      // created_date (más recientes primero)
       return String(b.created_date || '').localeCompare(String(a.created_date || ''));
     });
 
     return result;
-  }, [items, search, sortKey]);
+  }, [items, search, sortKey, view]);
 
   if (isLoading) {
     return (
@@ -61,15 +74,15 @@ export default function Watchlist() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-[1600px] mx-auto min-w-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
             <Clapperboard className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Por ver</h1>
+            <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Pendientes</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {filtered.length} {filtered.length === 1 ? 'obra pendiente' : 'obras pendientes'}
+              {filtered.length} {filtered.length === 1 ? 'obra' : 'obras'}
             </p>
           </div>
         </div>
@@ -98,6 +111,24 @@ export default function Watchlist() {
         </div>
       </div>
 
+      {/* Segmented view */}
+      <div className="flex gap-1.5 mb-6">
+        {VIEWS.map(v => (
+          <button
+            key={v.key}
+            onClick={() => setView(v.key)}
+            className={cn(
+              'text-sm px-3.5 py-1.5 rounded-lg border transition-all',
+              view === v.key
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-muted-foreground border-border hover:border-primary/40'
+            )}
+          >
+            {v.label} <span className="opacity-70">· {counts[v.key]}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Grid */}
       <div className="grid gap-3 md:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {filtered.map(item => (
@@ -108,9 +139,9 @@ export default function Watchlist() {
       {filtered.length === 0 && (
         <div className="text-center py-20">
           <p className="text-muted-foreground">
-            {items.length === 0
-              ? 'No tienes obras pendientes por ahora.'
-              : 'No se encontraron pendientes con esa búsqueda.'}
+            {view === 'abandoned'
+              ? (counts.abandoned === 0 ? 'No tienes obras abandonadas.' : 'No se encontraron abandonadas con esa búsqueda.')
+              : (counts.active === 0 ? 'No tienes obras pendientes por ahora.' : 'No se encontraron pendientes con esa búsqueda.')}
           </p>
         </div>
       )}

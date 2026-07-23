@@ -51,7 +51,7 @@ function SuggestionCard({ suggestion, onAdd, adding }) {
           className="w-full mt-auto"
         >
           <Plus className="w-4 h-4 mr-1.5" />
-          Añadir a Watchlist
+          Añadir a Pendientes
         </Button>
       </div>
     </div>
@@ -181,7 +181,7 @@ Responde SOLO con JSON válido, sin texto adicional.`;
       synopsis: suggestion.synopsis || '',
       poster_url: suggestion.poster_url || '',
     });
-    queryClient.invalidateQueries({ queryKey: ['media-items'] });
+    queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey?.[0] === 'string' && q.queryKey[0].startsWith('media-items') });
     setAddingId(null);
     setSuggestions(prev => prev.filter(s => s.title !== suggestion.title));
   };

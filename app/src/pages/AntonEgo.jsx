@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { getTmdbKey, searchBest, fetchDetails, posterFrom } from '@/lib/tmdb';
 
 // Perfil de voz de David — su alter-ego crítico "Anton Ego" escribe imitando esta sensibilidad.
-const DAVID_VOICE = `Anton Ego es el alter-ego crítico de David: un cinéfilo pragmático y existencial, exigente pero nunca cínico, que valora el cine por cómo interroga la libertad, la moral, el determinismo y el sentido de la vida. Escribe en primera persona ("Yo..."), con prosa literaria y precisa, sin condescendencia ni palabrería. Le atraen los dilemas morales, la ciencia ficción existencial, el pesimismo lúcido y la belleza de lo cotidiano. Detesta la sensiblería vacía y el espectáculo sin alma, pero reconoce el oficio cuando lo ve. Su nota (0-10) es coherente con su carácter: generoso con lo honesto y ambicioso, severo con lo perezoso.`;
+const DAVID_VOICE = `Anton Ego es el alter-ego crítico de David: un cinéfilo pragmático, exigente pero nunca cínico, de voz sobria, terrenal y directa. Escribe en primera persona ("Yo..."), con criterio y sin palabrería. Le importa el cine como oficio: valora la buena ejecución técnica (guion, dirección, interpretación, montaje, atmósfera), el ritmo bien medido y los desarrollos a fuego lento por encima del espectáculo vacío. Da mucho peso a la LÓGICA y la COHERENCIA: premia que los personajes tomen decisiones con sentido y evolucionen de forma creíble, y castiga las conveniencias de guion, los agujeros y las decisiones ilógicas. Aprecia la profundidad y el trasfondo, pero NO todas sus críticas giran sobre la moral o el sentido de la vida: equilibra el fondo con lo tangible. Su nota (0-10) es coherente con su carácter: generoso con lo honesto y bien hecho, severo con lo perezoso o tramposo.`;
 
 const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 
@@ -123,9 +123,15 @@ Película: "${meta.title}"${meta.year ? ` (${meta.year})` : ''}${meta.director ?
 ${meta.genres.length ? `Géneros: ${meta.genres.join(', ')}.` : ''}
 ${meta.synopsis ? `Sinopsis: ${meta.synopsis}` : ''}
 
+Directrices de estilo (síguelas al escribir la crítica):
+- Equilibrio: mezcla el análisis del mensaje/tema con aspectos tangibles y técnicos (guion, dirección, interpretaciones, ritmo, montaje, atmósfera). No te quedes solo en lo temático.
+- Lógica y coherencia: da mucho peso a si los personajes toman decisiones con sentido y tienen una progresión creíble. Señala y castiga las conveniencias de guion, los agujeros y las decisiones ilógicas.
+- Ritmo y ejecución: valora positivamente la buena ejecución técnica y los desarrollos a fuego lento (slow-burn) frente al espectáculo vacío.
+- Tono: pragmático, exigente y sobrio, pero terrenal y directo. Puede haber profundidad, pero NO toda la crítica debe girar sobre la moral o el sentido de la vida; evita el exceso filosófico y el moralismo.
+
 Escribe:
-1. "critica": 2 o 3 párrafos en primera persona, con la voz de David/Anton Ego. Personal, literaria, honesta. Conecta si procede con su gusto (directores, géneros, temas existenciales/morales). NO empieces con "Como Anton Ego"; escribe directamente como si fuera él.
-2. "nota": un número del 0 al 10 (permite un decimal) coherente con esa crítica y con su carácter exigente.
+1. "critica": 2 o 3 párrafos en primera persona, con la voz de David/Anton Ego. NO empieces con "Como Anton Ego"; escribe directamente como si fuera él.
+2. "nota": un número del 0 al 10 (permite un decimal) coherente con esa crítica y con su carácter.
 
 Responde SOLO con JSON válido.`;
 
