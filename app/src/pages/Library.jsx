@@ -9,6 +9,7 @@ import MediaCard from '@/components/library/MediaCard';
 import MediaTable from '@/components/library/MediaTable';
 import FilterSidebar from '@/components/library/FilterSidebar';
 import MediaDetailSheet from '@/components/library/MediaDetailSheet';
+import { canonGenre } from '@/lib/genres';
 
 const CURRENT_YEAR = new Date().getFullYear();
 
@@ -39,7 +40,7 @@ export default function Library() {
 
   const genres = useMemo(() => {
     const set = new Set();
-    items.forEach(i => { if (i.genre1) set.add(i.genre1); if (i.genre2) set.add(i.genre2); });
+    items.forEach(i => { if (i.genre1) set.add(canonGenre(i.genre1)); if (i.genre2) set.add(canonGenre(i.genre2)); });
     return [...set].sort();
   }, [items]);
 
@@ -65,7 +66,7 @@ export default function Library() {
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
       if ((filters.genres || []).length > 0) {
-        const hasGenre = filters.genres.some(g => item.genre1 === g || item.genre2 === g);
+        const hasGenre = filters.genres.some(g => canonGenre(item.genre1) === g || canonGenre(item.genre2) === g);
         if (!hasGenre) return false;
       }
       if (filters.director && item.director !== filters.director) return false;

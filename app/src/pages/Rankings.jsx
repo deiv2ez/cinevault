@@ -5,6 +5,7 @@ import { useDeduplicatedItems } from '@/lib/useDeduplicatedItems';
 import { Star, TrendingUp, TrendingDown, Film, Thermometer, Clapperboard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { canonGenre } from '@/lib/genres';
 
 function RankingList({ items, title, emptyText = 'No hay datos' }) {
   return (
@@ -88,7 +89,7 @@ export default function Rankings() {
   // Termómetro de géneros: tu nota media por género (dónde eres generoso vs exigente)
   const genreThermo = useMemo(() => {
     const map = {};
-    rated.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) (map[g] = map[g] || []).push(i.rating); }));
+    rated.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) { const cg = canonGenre(g); (map[cg] = map[cg] || []).push(i.rating); } }));
     return Object.entries(map)
       .filter(([, arr]) => arr.length >= 3)
       .map(([g, arr]) => ({ g, n: arr.length, avg: arr.reduce((a, b) => a + b, 0) / arr.length }))

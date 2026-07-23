@@ -78,7 +78,7 @@ export default function AddNew() {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-[900px] mx-auto">
+    <div className="p-4 md:p-6 lg:p-8 max-w-[900px] mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-foreground tracking-tight">
           {isEdit ? 'Editar Obra' : 'Añadir Nueva Obra'}
@@ -97,7 +97,7 @@ export default function AddNew() {
       )}
 
       {/* Form */}
-      <div className="bg-card rounded-xl border border-border p-6">
+      <div className="bg-card rounded-xl border border-border p-4 md:p-6">
         <MediaForm
           data={data}
           setData={setData}

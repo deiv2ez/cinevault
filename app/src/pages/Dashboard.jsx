@@ -11,6 +11,7 @@ import HighlightHeatmap from '@/components/dashboard/HighlightHeatmap';
 import TopRanking from '@/components/dashboard/TopRanking';
 import HallOfFame from '@/components/dashboard/HallOfFame';
 import HighlightsCloud from '@/components/dashboard/HighlightsCloud';
+import { canonGenre } from '@/lib/genres';
 
 const QUICK_TOOLS = [
   { path: '/oracle', label: 'El Oráculo', desc: 'Sugerencias IA personalizadas', icon: Sparkles, color: 'text-primary bg-primary/10' },
@@ -37,7 +38,7 @@ export default function Dashboard() {
   const WATCHED = ['Visto', 'Visto muchas veces', 'Favorito'];
   const watched = deduped.filter(i => WATCHED.includes(i.status));
   const uniqueDirectors = new Set(deduped.filter(i => i.director).map(i => i.director)).size;
-  const genres = new Set(deduped.flatMap(i => [i.genre1, i.genre2]).filter(Boolean)).size;
+  const genres = new Set(deduped.flatMap(i => [i.genre1, i.genre2]).filter(Boolean).map(canonGenre)).size;
   const rewatched = deduped.filter(i => i.status === 'Visto muchas veces').length;
   const pending = deduped.filter(i => i.status === 'Pendiente').length;
   const abandoned = deduped.filter(i => i.status === 'Abandono').length;

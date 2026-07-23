@@ -71,7 +71,8 @@ export default function HotTakes() {
       .map(i => ({ ...i, _diff: Number(i.rating) - Number(i.tmdb_rating) }));
 
     const underrated = comparable
-      .filter(i => i._diff > 0)
+      // Excluye tus notas altísimas (>9.3): son tu top, no una "defensa" contra el público
+      .filter(i => i._diff > 0 && Number(i.rating) <= 9.3)
       .sort((a, b) => b._diff - a._diff)
       .slice(0, 15);
 
