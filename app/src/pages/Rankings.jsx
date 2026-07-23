@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { useDeduplicatedItems } from '@/lib/useDeduplicatedItems';
-import { Star, TrendingUp, TrendingDown, Film, Gem, Clapperboard } from 'lucide-react';
+import { Star, TrendingUp, TrendingDown, Film, Thermometer, Clapperboard } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -85,14 +85,14 @@ export default function Rankings() {
       .slice(0, 15);
   }, [rated]);
 
-  // Joyas ocultas: las adoras (≥8) muy por encima del público (necesita tmdb_rating)
-  const gems = useMemo(() => {
-    return rated
-      .filter(i => i.rating >= 8 && i.tmdb_rating != null && Number(i.tmdb_rating) > 0)
-      .map(i => ({ ...i, _gap: Number(i.rating) - Number(i.tmdb_rating) }))
-      .filter(i => i._gap >= 1.5)
-      .sort((a, b) => b._gap - a._gap)
-      .slice(0, 12);
+  // Termómetro de géneros: tu nota media por género (dónde eres generoso vs exigente)
+  const genreThermo = useMemo(() => {
+    const map = {};
+    rated.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) (map[g] = map[g] || []).push(i.rating); }));
+    return Object.entries(map)
+      .filter(([, arr]) => arr.length >= 3)
+      .map(([g, arr]) => ({ g, n: arr.length, avg: arr.reduce((a, b) => a + b, 0) / arr.length }))
+      .sort((a, b) => b.avg - a.avg);
   }, [rated]);
 
   if (isLoading) {
@@ -115,7 +115,7 @@ export default function Rankings() {
           <TabsTrigger value="top10">Top 10</TabsTrigger>
           <TabsTrigger value="decade">Por década</TabsTrigger>
           <TabsTrigger value="directors">Tus directores</TabsTrigger>
-          <TabsTrigger value="gems">Joyas ocultas</TabsTrigger>
+          <TabsTrigger value="genres">Géneros</TabsTrigger>
           <TabsTrigger value="versus">Sobre vs Infra</TabsTrigger>
         </TabsList>
 
@@ -162,36 +162,29 @@ export default function Rankings() {
           </div>
         </TabsContent>
 
-        <TabsContent value="gems">
+        <TabsContent value="genres">
           <div className="flex items-center gap-2 mb-4">
-            <Gem className="w-4 h-4 text-chart-2" />
-            <h3 className="text-sm font-semibold text-foreground">Joyas ocultas</h3>
-            <span className="text-xs text-muted-foreground">las defiendes muy por encima del público</span>
+            <Thermometer className="w-4 h-4 text-chart-2" />
+            <h3 className="text-sm font-semibold text-foreground">Termómetro de géneros</h3>
+            <span className="text-xs text-muted-foreground">tu nota media por género (3+ obras)</span>
           </div>
           <div className="space-y-2">
-            {gems.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Necesita la nota pública (TMDB). Ve a <span className="font-medium text-foreground">Ajustes → Enriquecer datos con TMDB</span> y ejecútalo para ver tus joyas ocultas.
-              </p>
-            )}
-            {gems.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-chart-2/20">
+            {genreThermo.length === 0 && <p className="text-sm text-muted-foreground">Aún no hay géneros con 3+ obras valoradas.</p>}
+            {genreThermo.map((row, i) => (
+              <div key={row.g} className="flex items-center gap-3 p-3 rounded-lg bg-card border border-border">
                 <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground flex-shrink-0">{i + 1}</span>
-                {item.poster_url ? (
-                  <img src={item.poster_url} className="w-9 h-[52px] rounded object-cover flex-shrink-0" alt="" />
-                ) : (
-                  <div className="w-9 h-[52px] rounded bg-muted flex items-center justify-center flex-shrink-0"><Film className="w-4 h-4 text-muted-foreground/30" /></div>
-                )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{item.title}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{[item.director, item.year].filter(Boolean).join(' · ')}</p>
-                </div>
-                <div className="text-right flex-shrink-0">
-                  <div className="flex items-center gap-1 justify-end">
-                    <span className="text-sm font-bold text-foreground">{item.rating.toFixed(1)}</span>
-                    <span className="text-[11px] text-muted-foreground">tú</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium truncate">{row.g}</p>
+                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{row.n} obras</span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">público {Number(item.tmdb_rating).toFixed(1)} · +{item._gap.toFixed(1)}</p>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full bg-chart-2" style={{ width: `${(row.avg / 10) * 100}%` }} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 flex-shrink-0 w-12 justify-end">
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                  <span className="text-sm font-bold">{row.avg.toFixed(1)}</span>
                 </div>
               </div>
             ))}
