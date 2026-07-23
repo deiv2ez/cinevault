@@ -18,7 +18,7 @@ const allNav = [
   { path: '/oracle',      label: 'El Oráculo IA',       icon: Sparkles },
   { path: '/radar',       label: 'Filmoradar',          icon: Radar },
   { path: '/picker',      label: '¿Qué veo hoy?',       icon: Shuffle },
-  { divider: 'Mi Historial' },
+  { divider: 'Apuntes' },
   { path: '/timeline',    label: 'Mi Timeline',         icon: Clock },
   { path: '/collections', label: 'Colecciones',         icon: Layers },
   { path: '/lab',         label: 'El Laboratorio',      icon: FlaskConical },
@@ -27,7 +27,7 @@ const allNav = [
   { path: '/hot-takes',   label: 'Tus hot takes',       icon: Flame },
   { path: '/dna',         label: 'ADN Cinematográfico', icon: Dna },
   { path: '/social',      label: 'Connect',             icon: Users },
-  { path: '/watchlist',   label: 'Por ver',             icon: Clapperboard },
+  { path: '/watchlist',   label: 'Pendientes',          icon: Clapperboard },
   { divider: '' },
   { path: '/settings',    label: 'Ajustes',             icon: Settings },
 ];
