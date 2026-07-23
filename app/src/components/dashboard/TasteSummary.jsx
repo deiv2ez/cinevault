@@ -46,14 +46,14 @@ export default function TasteSummary({ items }) {
   const generateBlurb = async () => {
     if (loadingBlurb || d.count === 0) return;
     setLoadingBlurb(true);
-    const prompt = `Eres un analista de cine. A partir de estos datos de la biblioteca de un espectador, escribe un RETRATO BREVE de su gusto: qué tipo de cine le va, qué estilo o directores, qué parece valorar y qué dice eso de él como espectador. 2-3 frases, ~50-75 palabras. Tono cercano y con criterio, NADA de filosofía densa ni floritura. Escribe en segunda persona ("Te va...", "Buscas...", "Valoras...") y NO uses ningún nombre propio.
+    const prompt = `Eres un analista de cine. A partir de estos datos de la biblioteca de un espectador, escribe un RETRATO de su gusto cinematográfico: qué tipo de cine le atrae, qué estilo, qué directores, qué parece valorar en una película, sus tendencias como espectador y qué dice todo eso de él. Extensión: entre 180 y 250 palabras, en 2-3 párrafos. Puede tener algo de profundidad y carácter, pero SIN la densidad filosófica ni la solemnidad de un manifiesto existencial: cercano, con criterio, concreto y apoyado en sus datos. Escribe en segunda persona ("Te atrae...", "Buscas...", "Valoras...") y NO uses ningún nombre propio.
 
 Datos:
 - Géneros más presentes: ${d.topGenres.join(', ') || 'n/d'}
-- Directores recurrentes: ${d.topDirectors.map(x => `${x.name} (${x.n})`).join(', ') || 'n/d'}
+- Directores recurrentes: ${d.topDirectors.map(x => `${x.name} (${x.n} obras, media ${x.avg.toFixed(1)})`).join(', ') || 'n/d'}
 - Nota media: ${d.avg.toFixed(1)} sobre 10
 - Década dominante: ${d.topDecade || 'n/d'}
-- Muestras de sus reseñas: ${d.samples.join(' | ') || 'n/d'}
+- Muestras de sus reseñas reales: ${d.samples.join(' | ') || 'n/d'}
 
 Responde SOLO con JSON válido: { "retrato": "..." }`;
     try {
@@ -87,6 +87,12 @@ Responde SOLO con JSON válido: { "retrato": "..." }`;
 
   const ratingTone = d.avg >= 7.5 ? 'te entregas a lo que te gana' : d.avg >= 6.5 ? 'repartes con equilibrio' : 'eres de nota exigente';
 
+  const directorText = d.topDirectors.length
+    ? (d.topDirectors.length === 1
+        ? d.topDirectors[0].name
+        : `${d.topDirectors.slice(0, 2).map(x => x.name).join(', ')}${d.topDirectors.length > 2 ? ' y ' + d.topDirectors[2].name : ''}`)
+    : null;
+
   return (
     <div className="bg-gradient-to-br from-primary/5 via-card to-card border border-border rounded-xl p-5 flex flex-col">
       <div className="flex items-center gap-2 mb-3">
@@ -107,9 +113,9 @@ Responde SOLO con JSON válido: { "retrato": "..." }`;
         </button>
       </div>
 
-      {/* Retrato IA (o fallback data-driven mientras carga / si falla) */}
+      {/* Retrato IA (o fallback data-driven completo mientras carga / si falla) */}
       {blurb?.text ? (
-        <p className="text-sm text-foreground/90 leading-relaxed">{blurb.text}</p>
+        <div className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line space-y-2">{blurb.text}</div>
       ) : loadingBlurb ? (
         <p className="text-sm text-muted-foreground leading-relaxed italic">Analizando tu gusto…</p>
       ) : (
@@ -117,7 +123,9 @@ Responde SOLO con JSON válido: { "retrato": "..." }`;
           {genreText
             ? <>Te mueves sobre todo en <span className="font-semibold text-foreground">{genreText}</span>.</>
             : <>Tu biblioteca aún está tomando forma.</>}
+          {directorText && <> Vuelves una y otra vez a <span className="font-semibold text-foreground">{directorText}</span>.</>}
           {d.ratedCount > 0 && <> Puntúas con criterio —media <span className="font-semibold text-foreground">{d.avg.toFixed(1)}</span>—: {ratingTone}.</>}
+          {d.topDecade && <> Tu época más presente es la de los <span className="font-semibold text-foreground">{d.topDecade}</span>.</>}
         </p>
       )}
 
