@@ -22,7 +22,7 @@ export default function MediaDetailSheet({ item, open, onClose }) {
 
   const handleDelete = async () => {
     await base44.entities.MediaItem.delete(item.id);
-    queryClient.invalidateQueries({ queryKey: ['media-items'] });
+    queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey?.[0] === 'string' && q.queryKey[0].startsWith('media-items') });
     onClose();
   };
 

@@ -28,8 +28,8 @@ export default function MediaTable({ items, onItemClick, sortField, sortDir, onS
   );
 
   return (
-    <div className="bg-card rounded-xl border border-border overflow-hidden">
-      <Table>
+    <div className="bg-card rounded-xl border border-border overflow-x-auto">
+      <Table className="min-w-[760px]">
         <TableHeader>
           <TableRow className="bg-muted/50">
             <TableHead className="w-12 text-xs"></TableHead>
@@ -38,7 +38,7 @@ export default function MediaTable({ items, onItemClick, sortField, sortDir, onS
             <SortHeader field="rating">Nota</SortHeader>
             <SortHeader field="director">Director</SortHeader>
             <TableHead className="text-xs">Género</TableHead>
-            <SortHeader field="status">Status</SortHeader>
+            <SortHeader field="status">Estado</SortHeader>
             <SortHeader field="category">Categoría</SortHeader>
             <TableHead className="text-xs">País</TableHead>
           </TableRow>
