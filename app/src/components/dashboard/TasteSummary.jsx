@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Fingerprint, RefreshCw, Loader2 } from 'lucide-react';
+import { canonGenre } from '@/lib/genres';
 
 // Resumen del estilo del espectador: unos datos (géneros, directores, nota, década)
 // + un retrato BREVE generado por IA (cacheado en localStorage, no en cada carga).
@@ -18,7 +19,7 @@ export default function TasteSummary({ items }) {
     const avg = rated.length ? rated.reduce((s, i) => s + Number(i.rating), 0) / rated.length : 0;
 
     const gCount = {};
-    items.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) gCount[g] = (gCount[g] || 0) + 1; }));
+    items.forEach(i => [i.genre1, i.genre2].forEach(g => { if (g) { const cg = canonGenre(g); gCount[cg] = (gCount[cg] || 0) + 1; } }));
     const topGenres = Object.entries(gCount).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([g]) => g);
 
     const dMap = {};

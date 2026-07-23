@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { canonGenre } from '@/lib/genres';
 
 const GENRE_COLORS = {
   'Drama': '#6B9E78',
@@ -53,11 +54,12 @@ export default function ScatterPlot({ items }) {
       x: i.year,
       y: i.rating,
       z: STATUS_SIZE[i.status] || 60,
-      color: GENRE_COLORS[i.genre1] || '#888',
+      _g: i.genre1 ? canonGenre(i.genre1) : null,
+      color: GENRE_COLORS[i.genre1 ? canonGenre(i.genre1) : ''] || '#888',
     }));
 
   const topGenres = Object.entries(
-    data.reduce((acc, d) => { if (d.genre1) acc[d.genre1] = (acc[d.genre1] || 0) + 1; return acc; }, {})
+    data.reduce((acc, d) => { if (d._g) acc[d._g] = (acc[d._g] || 0) + 1; return acc; }, {})
   ).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([g]) => g);
 
   return (
@@ -89,8 +91,8 @@ export default function ScatterPlot({ items }) {
                 <Cell
                   key={i}
                   fill={entry.color}
-                  opacity={hoveredGenre ? (entry.genre1 === hoveredGenre ? 1 : 0.15) : 0.8}
-                  stroke={hoveredGenre === entry.genre1 ? entry.color : 'transparent'}
+                  opacity={hoveredGenre ? (entry._g === hoveredGenre ? 1 : 0.15) : 0.8}
+                  stroke={hoveredGenre === entry._g ? entry.color : 'transparent'}
                   strokeWidth={1.5}
                 />
               ))}

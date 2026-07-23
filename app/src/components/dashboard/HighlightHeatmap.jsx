@@ -1,4 +1,5 @@
 import React from 'react';
+import { canonGenre } from '@/lib/genres';
 
 const TOP_HIGHLIGHTS = ['Fotografía', 'Guión', 'Actuaciones', 'Dirección', 'Banda sonora', 'Montaje', 'Atmósfera', 'Diálogos'];
 const TOP_GENRES = ['Drama', 'Thriller', 'Ciencia Ficción', 'Comedia', 'Acción', 'Horror', 'Fantasía', 'Crimen'];
@@ -15,9 +16,10 @@ export default function HighlightHeatmap({ items }) {
   });
 
   highRated.forEach(item => {
+    const g = canonGenre(item.genre1);
     [item.highlight1, item.highlight2, item.highlight3].filter(Boolean).forEach(h => {
-      if (matrix[h] && item.genre1 && matrix[h][item.genre1] !== undefined) {
-        matrix[h][item.genre1]++;
+      if (matrix[h] && g && matrix[h][g] !== undefined) {
+        matrix[h][g]++;
       }
     });
   });
