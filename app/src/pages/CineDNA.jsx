@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 
-const DAVID_PROFILE = `Perfil existencial de David: pragmático de la existencia que ha entendido que la verdadera libertad no consiste en no tener ataduras, sino en elegir por qué principios atarse y asumir íntegramente los resultados. Filtra su entorno sin condescendencia pero con exigencia, protegiendo su frontera interior de la pereza existencial y el victimismo, mientras mantiene profunda empatía y visión crítica hacia las injusticias sistémicas. Ha automatizado su brújula moral y no necesita actuar ni demostrar su identidad ante nadie; simplemente la habita con naturalidad. Encuentra la eudaimonía tanto en la defensa inquebrantable de sus ideales como en la llana sencillez de una tarde de ciclismo en el sofá.`;
+const VIEWER_PROFILE = `Perfil existencial del espectador: pragmático de la existencia que ha entendido que la verdadera libertad no consiste en no tener ataduras, sino en elegir por qué principios atarse y asumir íntegramente los resultados. Filtra su entorno sin condescendencia pero con exigencia, protegiendo su frontera interior de la pereza existencial y el victimismo, mientras mantiene profunda empatía y visión crítica hacia las injusticias sistémicas. Ha automatizado su brújula moral y no necesita actuar ni demostrar su identidad ante nadie; simplemente la habita con naturalidad. Encuentra la eudaimonía tanto en la defensa inquebrantable de sus ideales como en la llana sencillez de una tarde de ciclismo en el sofá.`;
 
 export default function CineDNA() {
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(() => {
+    try { const s = localStorage.getItem('cinedna_result'); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
   const [loading, setLoading] = useState(false);
 
   const { data: items = [], isLoading } = useQuery({
@@ -19,7 +21,6 @@ export default function CineDNA() {
 
   const run = async () => {
     setLoading(true);
-    setResult(null);
 
     const topItems = items
       .filter(i => i.rating != null && i.rating >= 8 && i.status !== 'Pendiente')
@@ -35,9 +36,9 @@ export default function CineDNA() {
     ).join('\n');
 
     const data = await base44.integrations.Core.InvokeLLM({
-      prompt: `Eres un filósofo y crítico de cine. Tu misión es hacer un análisis profundo del ADN cinematográfico de un cinéfilo llamado David basándote en sus películas con nota ≥ 8 y sus aspectos destacados favoritos.
+      prompt: `Eres un filósofo y crítico de cine. Tu misión es hacer un análisis profundo del ADN cinematográfico de este cinéfilo basándote en sus películas con nota ≥ 8 y sus aspectos destacados favoritos. IMPORTANTE: no uses ningún nombre propio para dirigirte al espectador; usa siempre "tú".
 
-${DAVID_PROFILE}
+${VIEWER_PROFILE}
 
 Sus películas top:
 ${summary}
@@ -45,9 +46,9 @@ ${summary}
 Sus aspectos destacados más frecuentes: ${highlights.join(', ')}
 
 Genera:
-1. Un "manifiesto" o reflexión filosófica (150-200 palabras) sobre su momento vital y sus inquietudes existenciales según lo que está consumiendo. Debe ser literario, profundo, personalizado para David, con referencias a algunas de sus películas. Escrito en segunda persona ("Tú, David...") con un tono de espejo existencial, no de psicólogo.
-2. Un "arquetipo cinematográfico" de David: un título corto y evocador (ej: "El Peregrino Racionalista", "El Arquitecto del Caos Ordenado").
-3. Tres recomendaciones de libros que conecten profundamente con las temáticas de sus películas top, especialmente si hay patrones de ciencia ficción existencial, dilemas morales, determinismo, libre albedrío. Para cada libro: título, autor, y una explicación de por qué conecta específicamente con el ADN cinematográfico de David (citar alguna de sus películas top como puente).`,
+1. Un "manifiesto" o reflexión filosófica (150-200 palabras) sobre su momento vital y sus inquietudes existenciales según lo que está consumiendo. Debe ser literario, profundo, personalizado, con referencias a algunas de sus películas. Escrito en segunda persona ("Tú...") SIN usar ningún nombre propio, con un tono de espejo existencial, no de psicólogo.
+2. Un "arquetipo cinematográfico": un título corto y evocador (ej: "El Peregrino Racionalista", "El Arquitecto del Caos Ordenado").
+3. Tres recomendaciones de libros que conecten profundamente con las temáticas de sus películas top, especialmente si hay patrones de ciencia ficción existencial, dilemas morales, determinismo, libre albedrío. Para cada libro: título, autor, y una explicación de por qué conecta específicamente con su ADN cinematográfico (citar alguna de sus películas top como puente).`,
       model: 'claude_sonnet_4_6',
       response_json_schema: {
         type: 'object',
@@ -61,7 +62,7 @@ Genera:
               properties: {
                 title: { type: 'string' },
                 author: { type: 'string' },
-                why: { type: 'string', description: 'Por qué conecta con el ADN de David' },
+                why: { type: 'string', description: 'Por qué conecta con su ADN' },
                 bridge_film: { type: 'string', description: 'Película de su lista que sirve de puente' },
               }
             }
@@ -71,7 +72,10 @@ Genera:
       }
     });
 
-    setResult(data);
+    if (data) {
+      setResult(data);
+      try { localStorage.setItem('cinedna_result', JSON.stringify(data)); } catch { /* noop */ }
+    }
     setLoading(false);
   };
 

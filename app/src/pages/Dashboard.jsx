@@ -24,7 +24,6 @@ const QUICK_TOOLS = [
   { path: '/collections', label: 'Colecciones', desc: 'Grupos inteligentes', icon: Layers, color: 'text-chart-2 bg-chart-2/10' },
   { path: '/lab', label: 'El Laboratorio', desc: 'Deep dive directores', icon: FlaskConical, color: 'text-chart-2 bg-chart-2/10' },
   { path: '/social', label: 'Connect', desc: 'Doble Oráculo', icon: Users, color: 'text-chart-2 bg-chart-2/10' },
-  { path: '/explore', label: 'Explorar', desc: 'Descubre por afinidad', icon: Compass, color: 'text-primary bg-primary/10' },
 ];
 
 export default function Dashboard() {

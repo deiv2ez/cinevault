@@ -66,7 +66,8 @@ export default function HotTakes() {
 
   const { comparable, underrated, overrated, avgBias, agreed } = useMemo(() => {
     const comparable = items
-      .filter(i => i.rating != null && i.tmdb_rating != null)
+      // Excluye las que no tienen nota pública real (0.0 = sin votos en TMDB)
+      .filter(i => i.rating != null && i.tmdb_rating != null && Number(i.tmdb_rating) > 0)
       .map(i => ({ ...i, _diff: Number(i.rating) - Number(i.tmdb_rating) }));
 
     const underrated = comparable

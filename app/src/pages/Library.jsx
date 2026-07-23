@@ -185,7 +185,7 @@ export default function Library() {
       {/* Content */}
       <div className="flex flex-col md:flex-row gap-4 md:gap-6">
         {showFilters && (
-          <aside className="w-full md:w-[240px] flex-shrink-0 md:sticky md:top-4 md:self-start">
+          <aside className="w-full md:w-[240px] flex-shrink-0 md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto scrollbar-hide">
             <FilterSidebar filters={filters} setFilters={setFilters} genres={genres} directors={directors} />
           </aside>
         )}
