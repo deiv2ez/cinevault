@@ -8,6 +8,11 @@
 //   - GEMINI_MODEL   : (opcional) modelo a usar. Por defecto "gemini-2.0-flash".
 // ============================================================
 
+// Vercel: amplía el límite de tiempo de la función (por defecto 10s en Hobby).
+// Sin esto, las críticas largas de Anton Ego se cortaban por timeout y solo
+// respondían las películas cuya generación era muy rápida.
+export const config = { maxDuration: 60 };
+
 function extractJson(text) {
   if (!text) return null;
   // Quita vallas de código ```json ... ```
