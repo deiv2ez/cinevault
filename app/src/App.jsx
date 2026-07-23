@@ -21,7 +21,6 @@ import DirectorLab from '@/pages/DirectorLab';
 import AntonEgo from '@/pages/AntonEgo';
 import HotTakes from '@/pages/HotTakes';
 
-import WatchlistPurge from '@/pages/WatchlistPurge';
 import Watchlist from '@/pages/Watchlist';
 import CineDNA from '@/pages/CineDNA';
 import Social from '@/pages/Social';
@@ -72,7 +71,6 @@ const AuthenticatedApp = () => {
         <Route path="/dna" element={<CineDNA />} />
         <Route path="/social" element={<Social />} />
         <Route path="/explore" element={<Explore />} />
-        <Route path="/purge" element={<WatchlistPurge />} />
         <Route path="/watchlist" element={<Watchlist />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
