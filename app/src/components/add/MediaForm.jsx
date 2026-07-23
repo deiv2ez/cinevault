@@ -13,7 +13,7 @@ const STATUSES = ['Visto', 'Visto muchas veces', 'Pendiente', 'Abandono', 'Favor
 const GENRES = [
   'Acción', 'Animación', 'Aventura', 'Bélico', 'Biografía', 'Ciencia Ficción', 'Comedia',
   'Crimen', 'Documental', 'Drama', 'Familia', 'Fantasía', 'Historia', 'Misterio',
-  'Musical', 'Romance', 'Suspense', 'Terror', 'Thriller', 'Western'
+  'Musical', 'Romance', 'Terror', 'Thriller', 'Western'
 ];
 const HIGHLIGHTS = [
   // Estándar analítico
@@ -29,10 +29,10 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
   const update = (key, value) => setData(prev => ({ ...prev, [key]: value }));
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit(); }} className="space-y-6">
-      <div className="flex gap-6">
+    <form onSubmit={e => { e.preventDefault(); onSubmit(); }} className="space-y-5 md:space-y-6">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
         {/* Poster preview */}
-        <div className="w-40 flex-shrink-0">
+        <div className="w-32 sm:w-40 flex-shrink-0 mx-auto sm:mx-0">
           <div className="aspect-[2/3] bg-muted rounded-xl overflow-hidden border border-border">
             {data.poster_url ? (
               <img src={data.poster_url} alt="" className="w-full h-full object-cover" />
@@ -51,8 +51,8 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
         </div>
 
         {/* Main fields */}
-        <div className="flex-1 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="flex-1 min-w-0 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label className="text-xs">Título Original</Label>
               <Input value={data.title || ''} onChange={e => update('title', e.target.value)} required />
@@ -63,7 +63,7 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             <div>
               <Label className="text-xs">Año</Label>
               <Input
@@ -94,7 +94,7 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label className="text-xs">Director</Label>
               <Input value={data.director || ''} onChange={e => update('director', e.target.value)} />
@@ -105,7 +105,7 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <Label className="text-xs">Género 1</Label>
               <Select value={data.genre1 || ''} onValueChange={v => update('genre1', v)}>
@@ -160,7 +160,7 @@ export default function MediaForm({ data, setData, onSubmit, isEdit, saving }) {
       </div>
 
       {/* Highlights */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[1, 2, 3].map(n => {
           const currentVal = data[`highlight${n}`] || '';
           // If the saved value isn't in the list, add it so it renders correctly
