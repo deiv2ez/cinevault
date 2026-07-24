@@ -99,17 +99,34 @@ const _fileStore = new Map();
 const Core = {
   // IA: llama a una función serverless (/api/invoke-llm) que usa el proveedor configurado.
   async InvokeLLM({ prompt, response_json_schema, add_context_from_internet, model } = {}) {
-    const res = await fetch('/api/invoke-llm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, response_json_schema, add_context_from_internet, model }),
-    });
-    if (!res.ok) {
+    const body = JSON.stringify({ prompt, response_json_schema, add_context_from_internet, model });
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const maxAttempts = 4; // 1 intento + 3 reintentos ante el límite por minuto del free tier
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      const res = await fetch('/api/invoke-llm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+      if (res.ok) return res.json(); // objeto JSON con la forma de response_json_schema
+
+      // Límite de cuota (429): reintentar esperando lo que indique el servidor.
+      if (res.status === 429) {
+        let serverMs = 0;
+        try { const j = await res.clone().json(); if (j.retryAfterMs) serverMs = Number(j.retryAfterMs); } catch { /* noop */ }
+        // Espera muy larga (cuota diaria): no tiene sentido reintentar.
+        if (serverMs > 65000) throw new Error('Límite diario de la IA gratuita alcanzado. Reintenta más tarde (o mañana).');
+        if (attempt < maxAttempts) {
+          const waitMs = Math.min(Math.max(serverMs || 12000, 3000), 30000);
+          await sleep(waitMs);
+          continue;
+        }
+        throw new Error('La IA gratuita está saturada ahora mismo. Espera ~1 minuto y reintenta.');
+      }
+
       const txt = await res.text().catch(() => '');
       throw new Error('IA no disponible (' + res.status + '). ' + txt.slice(0, 200));
     }
-    // La función devuelve directamente el objeto JSON con la forma de response_json_schema.
-    return res.json();
   },
 
   // Subida de fichero: guardamos el File en memoria y devolvemos una referencia local.
