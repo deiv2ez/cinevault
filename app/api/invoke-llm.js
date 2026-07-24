@@ -72,6 +72,19 @@ export default async function handler(req, res) {
 
     if (!r.ok) {
       const errTxt = await r.text().catch(() => '');
+      // Límite de cuota del free tier: devolvemos 429 + cuánto esperar, para que el cliente reintente.
+      if (r.status === 429) {
+        let retryAfterMs = 15000;
+        try {
+          const j = JSON.parse(errTxt);
+          const det = (j.error?.details || []).find((d) => (d['@type'] || '').includes('RetryInfo'));
+          if (det?.retryDelay) { const s = parseFloat(det.retryDelay); if (!isNaN(s)) retryAfterMs = Math.round(s * 1000) + 500; }
+        } catch { /* fallback al match de texto */ }
+        const m = errTxt.match(/retry in ([\d.]+)s/i);
+        if (m) retryAfterMs = Math.round(parseFloat(m[1]) * 1000) + 500;
+        res.status(429).json({ error: 'rate_limited', retryAfterMs, detail: errTxt.slice(0, 300) });
+        return;
+      }
       res.status(502).json({ error: 'Error del proveedor de IA', detail: errTxt.slice(0, 500) });
       return;
     }
