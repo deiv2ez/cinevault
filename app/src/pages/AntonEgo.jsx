@@ -167,7 +167,7 @@ Responde SOLO JSON válido.`;
       });
       if (data && (data.critica || data.nota != null)) setResult({ nota: data.nota, critica: data.critica || '' });
       else toast.error('La IA no devolvió una crítica. Inténtalo de nuevo.');
-    } catch { toast.error('No se pudo generar la crítica (puede ser límite diario de la IA). Inténtalo más tarde.'); }
+    } catch (err) { toast.error(err?.message || 'No se pudo generar la crítica. Inténtalo más tarde.'); }
     setLoading(false);
   };
 
@@ -257,6 +257,7 @@ Responde SOLO JSON válido.`;
             <Sparkles className="w-8 h-8 text-violet-500/50 animate-pulse" />
           </div>
           <p className="text-sm text-muted-foreground">Anton Ego está afilando la pluma...</p>
+          <p className="text-xs text-muted-foreground/70">Si la IA gratuita está saturada, espera unos segundos: reintenta solo.</p>
         </div>
       )}
 
