@@ -1,11 +1,20 @@
 // Utilidades compartidas para hablar con la API de TMDB.
-// La clave se guarda en localStorage ('tmdb_api_key') desde Ajustes.
+// La clave se resuelve así (en orden):
+//   1) localStorage 'tmdb_api_key' (la que cada usuario pone en Ajustes, por dispositivo)
+//   2) VITE_TMDB_API_KEY (variable de entorno en Vercel) → así TODOS los dispositivos
+//      (incluido el móvil) tienen búsqueda TMDB sin tener que configurarla a mano.
 
 const BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p';
 
 export function getTmdbKey() {
-  try { return localStorage.getItem('tmdb_api_key') || ''; } catch { return ''; }
+  try {
+    const local = localStorage.getItem('tmdb_api_key');
+    if (local && local.trim()) return local.trim();
+  } catch { /* noop */ }
+  // Fallback a la clave de entorno (compartida, disponible en todos los dispositivos).
+  const env = (import.meta.env.VITE_TMDB_API_KEY || '').trim();
+  return env || '';
 }
 
 export function posterFrom(path, size = 'w500') {
