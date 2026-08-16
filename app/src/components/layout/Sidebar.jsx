@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Library, PlusCircle, Trophy, Settings, 
   ChevronLeft, ChevronRight, Sun, Moon, Film,
   Sparkles, Radar, Shuffle, Clock, Layers, FlaskConical,
-  PenLine, Flame, Dna, Users, Clapperboard, Compass
+  PenLine, Flame, Dna, Users, Clapperboard, Compass, Award
 } from 'lucide-react';
 import { useTheme } from '@/lib/ThemeContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -23,6 +23,7 @@ const navItems = [
   { path: '/timeline', label: 'Mi Timeline', icon: Clock },
   { path: '/collections', label: 'Colecciones', icon: Layers },
   { path: '/lab', label: 'El Laboratorio', icon: FlaskConical },
+  { path: '/hall-of-fame', label: 'Hall of Fame', icon: Award },
   { divider: true, label: 'Pro' },
   { path: '/critic', label: 'Anton Ego', icon: PenLine },
   { path: '/hot-takes', label: 'Tus hot takes', icon: Flame },
