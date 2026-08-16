@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
-import { useQuery } from '@tanstack/react-query';
-import { PenLine, Loader2, Star, Film, Search, Sparkles, Users, RefreshCw } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { PenLine, Loader2, Star, Film, Search, Sparkles, Users, RefreshCw, Clock, Plus, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -49,8 +49,23 @@ async function tmdbSearchList(query, key) {
   } catch { return []; }
 }
 
+// ---- Historial de búsquedas (por dispositivo, en localStorage) ----
+const HIST_KEY = 'anton_ego_history';
+const HIST_MAX = 30;
+const histKeyOf = (m) => (m.tmdb_id ? 't' + m.tmdb_id : 'n' + norm(m.title));
+function loadHistory() {
+  try { const a = JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); return Array.isArray(a) ? a : []; } catch { return []; }
+}
+function saveHistory(list) {
+  try { localStorage.setItem(HIST_KEY, JSON.stringify(list.slice(0, HIST_MAX))); } catch { /* noop */ }
+}
+
 export default function AntonEgo() {
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState('');
+  const [history, setHistory] = useState(() => loadHistory());
+  const [addingPend, setAddingPend] = useState(false);
+  const [addedPend, setAddedPend] = useState(false);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -139,8 +154,60 @@ Muestras de sus reseñas reales (imita este tono, vocabulario y nivel de exigenc
 ${samples.join('\n') || 'n/d'}`;
   };
 
+  // Guarda/actualiza el historial: si la peli ya estaba, se sustituye por la última.
+  const pushHistory = (meta, res) => {
+    const entry = {
+      key: histKeyOf(meta), title: meta.title, year: meta.year || null,
+      director: meta.director || '', genres: meta.genres || [], synopsis: meta.synopsis || '',
+      poster_url: meta.poster_url || '', tmdb_id: meta.tmdb_id || '',
+      nota: res.nota != null ? res.nota : null, critica: res.critica || '', date: Date.now(),
+    };
+    setHistory(prev => {
+      const next = [entry, ...prev.filter(h => h.key !== entry.key)].slice(0, HIST_MAX);
+      saveHistory(next);
+      return next;
+    });
+  };
+  const removeHistory = (key) => setHistory(prev => { const n = prev.filter(h => h.key !== key); saveHistory(n); return n; });
+  const clearHistory = () => { saveHistory([]); setHistory([]); };
+
+  // Reabre una crítica guardada SIN volver a llamar a la IA (ahorra cuota).
+  const openHistory = (h) => {
+    setResults([]); setQuery(h.title); setLoading(false); setAddedPend(false);
+    setFilm({ title: h.title, year: h.year, director: h.director, genres: h.genres || [], synopsis: h.synopsis, poster_url: h.poster_url, tmdb_id: h.tmdb_id });
+    const match = items.find(i => norm(i.title) === norm(h.title) && i.rating != null);
+    setLibMatch(match || null);
+    setResult({ nota: h.nota, critica: h.critica });
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* noop */ }
+  };
+
+  // Añade la película actual a Pendientes (evita duplicados por tmdb_id o título).
+  const addToWatchlist = async () => {
+    if (!film) return;
+    const exists = items.find(i =>
+      (film.tmdb_id && String(i.tmdb_id) === String(film.tmdb_id)) || norm(i.title) === norm(film.title));
+    if (exists) {
+      setAddedPend(true);
+      toast.info(exists.status === 'Pendiente' ? 'Ya la tenías en Pendientes' : 'Esta película ya está en tu biblioteca');
+      return;
+    }
+    setAddingPend(true);
+    try {
+      await base44.entities.MediaItem.create({
+        title: film.title, year: film.year || null, director: film.director || '',
+        genre1: film.genres?.[0] || '', genre2: film.genres?.[1] || '',
+        synopsis: film.synopsis || '', poster_url: film.poster_url || '',
+        tmdb_id: film.tmdb_id || '', status: 'Pendiente',
+      });
+      queryClient.invalidateQueries({ predicate: (q) => typeof q.queryKey?.[0] === 'string' && q.queryKey[0].startsWith('media-items') });
+      setAddedPend(true);
+      toast.success('Añadida a Pendientes');
+    } catch (e) { toast.error(e?.message || 'No se pudo añadir a Pendientes'); }
+    setAddingPend(false);
+  };
+
   const runCritique = async (meta) => {
-    setLoading(true); setResult(null); setFilm(meta);
+    setLoading(true); setResult(null); setFilm(meta); setAddedPend(false);
     const match = items.find(i => norm(i.title) === norm(meta.title) && i.rating != null);
     setLibMatch(match || null);
 
@@ -165,7 +232,11 @@ Responde SOLO JSON válido.`;
         prompt,
         response_json_schema: { type: 'object', properties: { nota: { type: 'number' }, critica: { type: 'string' } } },
       });
-      if (data && (data.critica || data.nota != null)) setResult({ nota: data.nota, critica: data.critica || '' });
+      if (data && (data.critica || data.nota != null)) {
+        const res = { nota: data.nota, critica: data.critica || '' };
+        setResult(res);
+        pushHistory(meta, res);
+      }
       else toast.error('La IA no devolvió una crítica. Inténtalo de nuevo.');
     } catch (err) { toast.error(err?.message || 'No se pudo generar la crítica. Inténtalo más tarde.'); }
     setLoading(false);
@@ -189,11 +260,11 @@ Responde SOLO JSON válido.`;
     setResults([]);
     setQuery(r.title);
     const key = getTmdbKey();
-    let meta = { title: r.title, year: r.year, director: '', genres: [], synopsis: '', poster_url: r.poster_url ? r.poster_url.replace('/w92', '/w500') : '' };
+    let meta = { title: r.title, year: r.year, director: '', genres: [], synopsis: '', poster_url: r.poster_url ? r.poster_url.replace('/w92', '/w500') : '', tmdb_id: r.tmdb_id || '' };
     setLoading(true); setFilm(meta); setResult(null);
     try {
       const det = await fetchDetails(r.tmdb_id, key);
-      if (det) { meta = { ...meta, director: det.director || '', genres: det.genres || [], synopsis: det.synopsis || meta.synopsis, poster_url: det.poster_url || meta.poster_url }; }
+      if (det) { meta = { ...meta, director: det.director || '', genres: det.genres || [], synopsis: det.synopsis || meta.synopsis, poster_url: det.poster_url || meta.poster_url, tmdb_id: det.tmdb_id || meta.tmdb_id }; }
     } catch { /* sigue con lo básico */ }
     await runCritique(meta);
   };
@@ -251,6 +322,36 @@ Responde SOLO JSON válido.`;
         </p>
       </div>
 
+      {/* Historial de búsquedas (dedupe: solo la última vez de cada película) */}
+      {history.length > 0 && (
+        <div className="bg-card border border-border rounded-2xl p-4 md:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" /> Historial de búsquedas
+            </p>
+            <button onClick={clearHistory} className="text-[11px] text-muted-foreground hover:text-foreground transition-colors">Borrar todo</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+            {history.map(h => (
+              <div key={h.key} className="group flex items-center gap-2.5 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <button onClick={() => openHistory(h)} className="flex items-center gap-2.5 flex-1 min-w-0 text-left">
+                  {h.poster_url
+                    ? <img src={h.poster_url} alt="" className="w-8 h-12 rounded object-cover flex-shrink-0" />
+                    : <div className="w-8 h-12 rounded bg-muted flex items-center justify-center flex-shrink-0"><Film className="w-4 h-4 text-muted-foreground/40" /></div>}
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{h.title}{h.year ? <span className="text-muted-foreground font-normal ml-1">({h.year})</span> : ''}</p>
+                    <p className="text-[11px] text-muted-foreground">Nota predicha {h.nota != null ? Number(h.nota).toFixed(1) : '—'}</p>
+                  </div>
+                </button>
+                <button onClick={() => removeHistory(h.key)} title="Quitar del historial" className="opacity-60 sm:opacity-0 sm:group-hover:opacity-100 text-muted-foreground hover:text-destructive p-1 flex-shrink-0 transition-opacity">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {loading && (
         <div className="flex flex-col items-center py-16 gap-4">
           <div className="w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center">
@@ -304,9 +405,20 @@ Responde SOLO JSON válido.`;
             <div className="text-[15px] text-foreground/90 leading-relaxed space-y-3 whitespace-pre-wrap">{result.critica}</div>
           </div>
 
-          <Button variant="outline" size="sm" onClick={() => runCritique(film)} disabled={loading}>
-            <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Regenerar
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {!libMatch && (
+              <Button size="sm" onClick={addToWatchlist} disabled={addingPend || addedPend}>
+                {addedPend
+                  ? <><Check className="w-3.5 h-3.5 mr-1.5" /> En Pendientes</>
+                  : addingPend
+                    ? <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Añadiendo…</>
+                    : <><Plus className="w-3.5 h-3.5 mr-1.5" /> Añadir a Pendientes</>}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => runCritique(film)} disabled={loading}>
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" /> Regenerar
+            </Button>
+          </div>
         </motion.div>
       )}
 
