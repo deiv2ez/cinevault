@@ -25,6 +25,7 @@ import Watchlist from '@/pages/Watchlist';
 import CineDNA from '@/pages/CineDNA';
 import Social from '@/pages/Social';
 import Explore from '@/pages/Explore';
+import HallOfFame from '@/pages/HallOfFame';
 import Login from '@/pages/Login';
 
 const AuthenticatedApp = () => {
@@ -66,6 +67,7 @@ const AuthenticatedApp = () => {
         <Route path="/timeline" element={<Timeline />} />
         <Route path="/collections" element={<SmartCollections />} />
         <Route path="/lab" element={<DirectorLab />} />
+        <Route path="/hall-of-fame" element={<HallOfFame />} />
         <Route path="/critic" element={<AntonEgo />} />
         <Route path="/hot-takes" element={<HotTakes />} />
         <Route path="/dna" element={<CineDNA />} />
