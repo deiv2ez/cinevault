@@ -223,7 +223,7 @@ ${meta.genres?.length ? `Géneros: ${meta.genres.join(', ')}.` : ''}
 ${meta.synopsis ? `Sinopsis: ${meta.synopsis}` : ''}
 
 Escribe, como Anton Ego (NO empieces con "Como Anton Ego"; escribe directamente como si fueras él):
-1. "critica": 2 o 3 párrafos en primera persona.
+1. "critica": TRES párrafos completos, densos y bien desarrollados en primera persona (extensión generosa, no te quedes corto; entra en detalle sobre guion, dirección, personajes, ritmo y ejecución).
 2. "nota": número del 0 al 10 (un decimal), coherente con la crítica y con el criterio calibrado.
 Responde SOLO JSON válido.`;
 
